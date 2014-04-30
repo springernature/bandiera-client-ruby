@@ -1,7 +1,7 @@
-require "typhoeus"
-require "json"
+require 'typhoeus'
+require 'json'
 
-require_relative "feature"
+require_relative 'feature'
 
 module Bandiera
   class Client
@@ -13,12 +13,12 @@ module Bandiera
 
     attr_accessor :timeout
 
-    def initialize(base_uri="http://localhost", logger=Logger.new($stdout))
+    def initialize(base_uri = 'http://localhost', logger = Logger.new($stdout))
       @base_uri = base_uri
       @logger   = logger
       @timeout  = 0.02 # 20ms default timeout
 
-      @base_uri << "/api" unless @base_uri.match(/\/api$/)
+      @base_uri << '/api' unless @base_uri.match(/\/api$/)
     end
 
     def enabled?(group, feature)
@@ -28,9 +28,9 @@ module Bandiera
     def get_all
       groups = {}
 
-      get("/v1/all")["groups"].each do |grp|
-        group    = grp["name"]
-        features = grp["features"].map { |f| Bandiera::Feature.new(f["name"], group, f["description"], f["enabled"]) }
+      get('/v1/all')['groups'].each do |grp|
+        group    = grp['name']
+        features = grp['features'].map { |f| Bandiera::Feature.new(f['name'], group, f['description'], f['enabled']) }
         groups[group] = features
       end
 
@@ -42,8 +42,8 @@ module Bandiera
       default_response = []
 
       handle_exceptions(error_msg_prefix, default_response) do
-        get("/v1/groups/#{group}/features")["features"].map do |f|
-          Bandiera::Feature.new(f["name"], group, f["description"], f["enabled"])
+        get("/v1/groups/#{group}/features")['features'].map do |f|
+          Bandiera::Feature.new(f['name'], group, f['description'], f['enabled'])
         end
       end
     end
@@ -55,9 +55,9 @@ module Bandiera
       handle_exceptions(error_msg_prefix, default_response) do
         res = get("/v1/groups/#{group}/features/#{feature}")
 
-        @logger.warn "#{error_msg_prefix} - #{res["warning"]}" if res["warning"]
+        @logger.warn "#{error_msg_prefix} - #{res["warning"]}" if res['warning']
 
-        Bandiera::Feature.new(feature, group, res["feature"]["description"], res["feature"]["enabled"])
+        Bandiera::Feature.new(feature, group, res['feature']['description'], res['feature']['enabled'])
       end
     end
 
@@ -80,11 +80,11 @@ module Bandiera
         if response.success?
           # w00t
         elsif response.timed_out?
-          raise TimeOutError.new("TimeOut occured requesting '#{url}'")
+          fail TimeOutError.new("TimeOut occured requesting '#{url}'")
         elsif response.code == 0
-          raise ServerDownError.new("Bandiera appears to be down.")
+          fail ServerDownError.new('Bandiera appears to be down.')
         else
-          raise RequestError.new("GET request to '#{url}' returned #{response.code}")
+          fail RequestError.new("GET request to '#{url}' returned #{response.code}")
         end
       end
 

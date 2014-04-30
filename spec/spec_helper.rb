@@ -1,16 +1,15 @@
-require "bundler"
+require 'bundler'
 Bundler.setup(:default, :test)
 
-ENV["RACK_ENV"] = "test"
+ENV['RACK_ENV'] = 'test'
 
-require "rspec"
-require "webmock/rspec"
+require 'rspec'
+require 'webmock/rspec'
 
-require_relative "../lib/bandiera"
+require_relative '../lib/bandiera'
 
 WebMock.disable_net_connect!
 
 RSpec.configure do |config|
-  config.order = "random"
+  config.order = 'random'
 end
-
