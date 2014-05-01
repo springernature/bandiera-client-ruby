@@ -1,7 +1,7 @@
-require "typhoeus"
-require "json"
+require 'typhoeus'
+require 'json'
 
-require_relative "feature"
+# TODO: add some intelligent way of using the bulk endpoints...
 
 module Bandiera
   class Client
@@ -12,83 +12,88 @@ module Bandiera
     HANDLED_EXCEPTIONS = [RequestError, ServerDownError, TimeOutError]
 
     attr_accessor :timeout
+    attr_reader :logger
 
-    def initialize(base_uri="http://localhost", logger=Logger.new($stdout))
+    def initialize(base_uri = 'http://localhost', logger = Logger.new($stdout))
       @base_uri = base_uri
       @logger   = logger
       @timeout  = 0.02 # 20ms default timeout
 
-      @base_uri << "/api" unless @base_uri.match(/\/api$/)
+      @base_uri << '/api' unless @base_uri.match(/\/api$/)
     end
 
-    def enabled?(group, feature)
-      get_feature(group, feature).enabled?
-    end
-
-    def get_all
-      groups = {}
-
-      get("/v1/all")["groups"].each do |grp|
-        group    = grp["name"]
-        features = grp["features"].map { |f| Bandiera::Feature.new(f["name"], group, f["description"], f["enabled"]) }
-        groups[group] = features
-      end
-
-      groups
-    end
-
-    def get_features_for_group(group)
-      error_msg_prefix = "[Bandiera::Client#get_features_for_group] '#{group}'"
-      default_response = []
-
-      handle_exceptions(error_msg_prefix, default_response) do
-        get("/v1/groups/#{group}/features")["features"].map do |f|
-          Bandiera::Feature.new(f["name"], group, f["description"], f["enabled"])
-        end
-      end
-    end
-
-    def get_feature(group, feature)
-      error_msg_prefix = "[Bandiera::Client#get_feature] '#{group} / #{feature}'"
-      default_response = Bandiera::Feature.new(feature, group, nil, false)
-
-      handle_exceptions(error_msg_prefix, default_response) do
-        res = get("/v1/groups/#{group}/features/#{feature}")
-
-        @logger.warn "#{error_msg_prefix} - #{res["warning"]}" if res["warning"]
-
-        Bandiera::Feature.new(feature, group, res["feature"]["description"], res["feature"]["enabled"])
-      end
+    def enabled?(group, feature, params = { user_group: nil })
+      get_feature(group, feature, params)
     end
 
     private
 
-    def handle_exceptions(error_msg_prefix, return_upon_error, &block)
-      begin
-        yield
-      rescue *HANDLED_EXCEPTIONS => error
-        @logger.warn("#{error_msg_prefix} - #{error.message}")
-        return_upon_error
-      end
+    def get_feature(group, feature, params)
+      path             = "/v2/groups/#{group}/features/#{feature}"
+      default_response = false
+      error_msg_prefix = "[Bandiera::Client#get_feature] '#{group} / #{feature} / #{params}'"
+
+      get_and_handle_exceptions(path, params, default_response, error_msg_prefix)
     end
 
-    def get(path)
+    def get_features_for_group(group, params)
+      path             = "/v2/groups/#{group}/features"
+      default_response = {}
+      error_msg_prefix = "[Bandiera::Client#get_features_for_group] '#{group} / #{params}'"
+
+      get_and_handle_exceptions(path, params, default_response, error_msg_prefix)
+    end
+
+    def get_all(params)
+      path             = '/v2/all'
+      default_response = {}
+      error_msg_prefix = "[Bandiera::Client#get_all] '#{params}'"
+
+      get_and_handle_exceptions(path, params, default_response, error_msg_prefix)
+    end
+
+    def get_and_handle_exceptions(path, params, return_upon_error, error_msg_prefix)
+      res = get(path, params)
+      logger.warn "#{error_msg_prefix} - #{res['warning']}" if res['warning']
+      res['response']
+    rescue *HANDLED_EXCEPTIONS => error
+      logger.warn("#{error_msg_prefix} - #{error.message}")
+      return_upon_error
+    end
+
+    def get(path, params)
       url     = "#{@base_uri}#{path}"
-      request = Typhoeus::Request.new(url, timeout: timeout, connecttimeout: timeout)
+      request = Typhoeus::Request.new(
+        url,
+        method:         :get,
+        timeout:        timeout,
+        connecttimeout: timeout,
+        params:         clean_params(params)
+      )
 
       request.on_complete do |response|
         if response.success?
           # w00t
         elsif response.timed_out?
-          raise TimeOutError.new("TimeOut occured requesting '#{url}'")
+          fail TimeOutError, "Timeout occured requesting '#{url}'"
         elsif response.code == 0
-          raise ServerDownError.new("Bandiera appears to be down.")
+          fail ServerDownError, 'Bandiera appears to be down.'
         else
-          raise RequestError.new("GET request to '#{url}' returned #{response.code}")
+          fail RequestError, "GET request to '#{url}' returned #{response.code}"
         end
       end
 
       JSON.parse(request.run.body)
+    end
+
+    def clean_params(passed_params)
+      params = {}
+
+      passed_params.each do |key, val|
+        params[key] = val unless val.nil? || val.empty?
+      end
+
+      params
     end
   end
 end
