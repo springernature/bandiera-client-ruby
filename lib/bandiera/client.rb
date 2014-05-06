@@ -14,10 +14,11 @@ module Bandiera
     attr_accessor :timeout
     attr_reader :logger
 
-    def initialize(base_uri = 'http://localhost', logger = Logger.new($stdout))
-      @base_uri = base_uri
-      @logger   = logger
-      @timeout  = 0.02 # 20ms default timeout
+    def initialize(base_uri = 'http://localhost', logger = Logger.new($stdout), client_name = nil)
+      @base_uri    = base_uri
+      @logger      = logger
+      @timeout     = 0.02 # 20ms default timeout
+      @client_name = client_name
 
       @base_uri << '/api' unless @base_uri.match(/\/api$/)
     end
@@ -27,6 +28,14 @@ module Bandiera
     end
 
     private
+
+    def headers
+      headers = {
+        'User-Agent' => "Bandiera Ruby Client / #{Bandiera::Client::VERSION}"
+      }
+      headers.merge! 'Bandiera-Client' => @client_name unless @client_name.nil?
+      headers
+    end
 
     def get_feature(group, feature, params)
       path             = "/v2/groups/#{group}/features/#{feature}"
@@ -68,7 +77,8 @@ module Bandiera
         method:         :get,
         timeout:        timeout,
         connecttimeout: timeout,
-        params:         clean_params(params)
+        params:         clean_params(params),
+        headers:        headers
       )
 
       request.on_complete do |response|

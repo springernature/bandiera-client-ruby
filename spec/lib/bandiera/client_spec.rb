@@ -6,6 +6,19 @@ describe Bandiera::Client do
   let(:logger)    { double }
   subject         { Bandiera::Client.new(api_uri, logger) }
 
+  context 'when a client name is provided' do
+    let(:group)   { 'pubserv' }
+    let(:feature) { 'log-stats' }
+    let(:url)     { "#{api_uri}/v2/groups/#{group}/features/#{feature}" }
+
+    it 'sends it as part of the headers' do
+      stub = stub_api_request(url, { 'response' => true }, { 'Bandiera-Client' => 'asdf' })
+      client = Bandiera::Client.new api_uri, logger, 'asdf'
+      client.enabled? group, feature
+      expect(stub).to have_been_requested
+    end
+  end
+
   describe '#enabled?' do
     let(:group)   { 'pubserv' }
     let(:feature) { 'log-stats' }
@@ -103,8 +116,10 @@ describe Bandiera::Client do
 
   private
 
-  def stub_api_request(url, response)
+  def stub_api_request(url, response, headers = {})
+    headers.merge! 'User-Agent' => "Bandiera Ruby Client / #{Bandiera::Client::VERSION}"
     stub_request(:get, url)
+      .with(headers: headers)
       .to_return(
         body: JSON.generate(response),
         headers: { 'Content-Type' => 'application/json' }
