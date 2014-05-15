@@ -2,13 +2,12 @@ require 'rest_client'
 require 'json'
 require 'logger'
 
-require_relative 'client/version'
-
 # TODO: add some intelligent way of using the bulk endpoints...
 
 module Bandiera
   class Client
     autoload :VERSION, 'bandiera/client/version'
+
     attr_accessor :timeout, :logger, :client_name
 
     def initialize(base_uri = 'http://localhost', logger = Logger.new($stdout), client_name = nil)
