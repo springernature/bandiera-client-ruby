@@ -83,16 +83,20 @@ module Bandiera
 
       request.on_complete do |response|
         if response.success?
-          # w00t
+          logger.debug "Request for '#{url}' succeeded. [cached = #{response.cached?}]"
         elsif response.timed_out?
+          logger.warn "Request for '#{url}' timed out."
           fail TimeOutError, "Timeout occured requesting '#{url}'"
         elsif response.code == 0
+          logger.warn "Bandiera appeared down when requesting '#{url}'"
           fail ServerDownError, 'Bandiera appears to be down.'
         else
+          logger.warn "Bandiera returned '#{response.code}' when requesting '#{url}'"
           fail RequestError, "GET request to '#{url}' returned #{response.code}"
         end
       end
 
+      logger.debug "I will request #{path} with params #{params.inspect}"
       JSON.parse(request.run.body)
     end
 
