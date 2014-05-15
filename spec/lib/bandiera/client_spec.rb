@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Bandiera::Client do
   let(:base_uri)  { 'http://bandiera.com' }
   let(:api_uri)   { "#{base_uri}/api" }
-  let(:logger)    { double }
+  let(:logger)    { double(debug: nil) }
   subject         { Bandiera::Client.new(api_uri, logger) }
 
   context 'when a client name is provided' do
