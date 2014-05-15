@@ -12,7 +12,7 @@ GIT
 PATH
   remote: .
   specs:
-    bandiera-client (2.0.2)
+    bandiera-client (2.0.3)
       rest_client
 
 GEM

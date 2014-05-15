@@ -1,3 +1,5 @@
+$LOAD_PATH.unshift File.join(__FILE__, '../../lib')
+
 require 'bundler'
 Bundler.setup(:default, :test)
 
@@ -8,4 +10,4 @@ require 'macmillan/utils/rspec/codeclimate_helper'
 require 'macmillan/utils/rspec/simplecov_helper'
 require 'macmillan/utils/rspec/webmock_helper'
 
-require_relative '../lib/bandiera'
+require 'bandiera/client'

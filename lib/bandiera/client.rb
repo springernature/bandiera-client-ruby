@@ -19,46 +19,44 @@ module Bandiera
       @base_uri << '/api' unless @base_uri.match(/\/api$/)
     end
 
-    def enabled?(group, feature, params = { user_group: nil })
-      get_feature(group, feature, params)
+    def enabled?(group, feature, params = { user_group: nil }, http_opts = {})
+      get_feature(group, feature, params, http_opts)
     end
 
     private
 
     def headers
-      headers = {
-        'User-Agent' => "Bandiera Ruby Client / #{Bandiera::Client::VERSION}"
-      }
-      headers.merge! 'Bandiera-Client' => client_name unless client_name.nil?
+      headers = { 'User-Agent' => "Bandiera Ruby Client / #{Bandiera::Client::VERSION}" }
+      headers.merge!('Bandiera-Client' => client_name) unless client_name.nil?
       headers
     end
 
-    def get_feature(group, feature, params)
+    def get_feature(group, feature, params, http_opts)
       path             = "/v2/groups/#{group}/features/#{feature}"
       default_response = false
       error_msg_prefix = "[Bandiera::Client#get_feature] '#{group} / #{feature} / #{params}'"
 
-      get_and_handle_exceptions(path, params, default_response, error_msg_prefix)
+      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
     end
 
-    def get_features_for_group(group, params)
+    def get_features_for_group(group, params, http_opts)
       path             = "/v2/groups/#{group}/features"
       default_response = {}
       error_msg_prefix = "[Bandiera::Client#get_features_for_group] '#{group} / #{params}'"
 
-      get_and_handle_exceptions(path, params, default_response, error_msg_prefix)
+      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
     end
 
-    def get_all(params)
+    def get_all(params, http_opts)
       path             = '/v2/all'
       default_response = {}
       error_msg_prefix = "[Bandiera::Client#get_all] '#{params}'"
 
-      get_and_handle_exceptions(path, params, default_response, error_msg_prefix)
+      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
     end
 
-    def get_and_handle_exceptions(path, params, return_upon_error, error_msg_prefix)
-      res = get(path, params)
+    def get_and_handle_exceptions(path, params, http_opts, return_upon_error, error_msg_prefix)
+      res = get(path, params, http_opts)
       logger.warn "#{error_msg_prefix} - #{res['warning']}" if res['warning']
       res['response']
     rescue RestClient::Exception => error
@@ -66,9 +64,10 @@ module Bandiera
       return_upon_error
     end
 
-    def get(path, params)
-      resource = RestClient::Resource.new(@base_uri, timeout: timeout, open_timeout: timeout, headers: headers)
-      response = resource[path].get(params: clean_params(params))
+    def get(path, params, passed_http_opts)
+      default_http_opts = { method: :get, timeout: timeout, open_timeout: timeout, headers: headers }
+      resource          = RestClient::Resource.new(@base_uri, default_http_opts.merge(passed_http_opts))
+      response          = resource[path].get(params: clean_params(params))
 
       JSON.parse(response.body)
     end
