@@ -1,4 +1,4 @@
-require 'typhoeus'
+require 'rest_client'
 require 'json'
 
 # TODO: add some intelligent way of using the bulk endpoints...
@@ -72,32 +72,23 @@ module Bandiera
 
     def get(path, params)
       url     = "#{@base_uri}#{path}"
-      request = Typhoeus::Request.new(
-        url,
-        method:         :get,
-        timeout:        timeout,
-        connecttimeout: timeout,
-        params:         clean_params(params),
-        headers:        headers
-      )
-
-      request.on_complete do |response|
-        if response.success?
-          logger.debug "Request for '#{url}' succeeded. [cached = #{response.cached?}]"
-        elsif response.timed_out?
-          logger.warn "Request for '#{url}' timed out."
-          fail TimeOutError, "Timeout occured requesting '#{url}'"
-        elsif response.code == 0
-          logger.warn "Bandiera appeared down when requesting '#{url}'"
-          fail ServerDownError, 'Bandiera appears to be down.'
-        else
-          logger.warn "Bandiera returned '#{response.code}' when requesting '#{url}'"
-          fail RequestError, "GET request to '#{url}' returned #{response.code}"
-        end
-      end
-
-      logger.debug "I will request #{path} with params #{params.inspect}"
-      JSON.parse(request.run.body)
+      client_headers = headers.merge params: clean_params(params)
+      client_params = {
+        method:       :get,
+        url:          url,
+        timeout:      timeout,
+        open_timeout: timeout,
+        headers:      client_headers
+      }
+      request = RestClient::Request.new client_params
+      response = request.execute
+      JSON.parse response.body
+    rescue RestClient::RequestTimeout
+      raise TimeOutError, "Timeout occured requesting '#{url}'"
+    rescue RestClient::ServerBrokeConnection
+      raise ServerDownError, 'Bandiera appears to be down.'
+    rescue => e
+      raise RequestError, "Error #{e.message}.\nGET request to '#{url}' returned #{response.inspect}"
     end
 
     def clean_params(passed_params)
