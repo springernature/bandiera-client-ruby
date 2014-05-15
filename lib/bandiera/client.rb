@@ -1,16 +1,10 @@
-require 'typhoeus'
+require 'rest_client'
 require 'json'
 
 # TODO: add some intelligent way of using the bulk endpoints...
 
 module Bandiera
   class Client
-    class RequestError < StandardError; end
-    class ServerDownError < StandardError; end
-    class TimeOutError < StandardError; end
-
-    HANDLED_EXCEPTIONS = [RequestError, ServerDownError, TimeOutError]
-
     attr_accessor :timeout
     attr_reader :logger
 
@@ -65,39 +59,16 @@ module Bandiera
       res = get(path, params)
       logger.warn "#{error_msg_prefix} - #{res['warning']}" if res['warning']
       res['response']
-    rescue *HANDLED_EXCEPTIONS => error
+    rescue RestClient::Exception => error
       logger.warn("#{error_msg_prefix} - #{error.message}")
       return_upon_error
     end
 
     def get(path, params)
-      url     = "#{@base_uri}#{path}"
-      request = Typhoeus::Request.new(
-        url,
-        method:         :get,
-        timeout:        timeout,
-        connecttimeout: timeout,
-        params:         clean_params(params),
-        headers:        headers
-      )
+      resource = RestClient::Resource.new(@base_uri, timeout: timeout, open_timeout: timeout, headers: headers)
+      response = resource[path].get(params: clean_params(params))
 
-      request.on_complete do |response|
-        if response.success?
-          logger.debug "Request for '#{url}' succeeded. [cached = #{response.cached?}]"
-        elsif response.timed_out?
-          logger.warn "Request for '#{url}' timed out."
-          fail TimeOutError, "Timeout occured requesting '#{url}'"
-        elsif response.code == 0
-          logger.warn "Bandiera appeared down when requesting '#{url}'"
-          fail ServerDownError, 'Bandiera appears to be down.'
-        else
-          logger.warn "Bandiera returned '#{response.code}' when requesting '#{url}'"
-          fail RequestError, "GET request to '#{url}' returned #{response.code}"
-        end
-      end
-
-      logger.debug "I will request #{path} with params #{params.inspect}"
-      JSON.parse(request.run.body)
+      JSON.parse(response.body)
     end
 
     def clean_params(passed_params)
