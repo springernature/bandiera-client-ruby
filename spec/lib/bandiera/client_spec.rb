@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Bandiera::Client do
   let(:base_uri)  { 'http://bandiera.com' }
   let(:api_uri)   { "#{base_uri}/api" }
-  let(:logger)    { double }
+  let(:logger)    { double.as_null_object }
   subject         { Bandiera::Client.new(api_uri, logger) }
 
   context 'when a client name is provided' do
@@ -54,7 +54,7 @@ describe Bandiera::Client do
         it 'returns a false, and logs a warning' do
           stub = stub_api_request(url, 'response' => false, 'warning' => 'The group does not exist')
 
-          logger.should_receive(:warn).once
+          logger.should_receive(:warn)
 
           response = subject.enabled?(group, feature)
 
@@ -67,7 +67,7 @@ describe Bandiera::Client do
         it 'returns a false, and logs a warning' do
           stub = stub_api_request(url, 'response' => false, 'warning' => 'The feature does not exist')
 
-          logger.should_receive(:warn).once
+          logger.should_receive(:warn)
 
           response = subject.enabled?(group, feature)
 
@@ -81,7 +81,7 @@ describe Bandiera::Client do
       it 'returns false, and logs a warning' do
         stub_request(:get, url).to_return(status: [0, ''])
 
-        logger.should_receive(:warn).once
+        logger.should_receive(:warn)
 
         response = subject.enabled?(group, feature)
 
@@ -93,7 +93,7 @@ describe Bandiera::Client do
       it 'returns false, and logs a warning' do
         stub_request(:get, url).to_return(status: 500, body: '')
 
-        logger.should_receive(:warn).once
+        logger.should_receive(:warn)
 
         response = subject.enabled?(group, feature)
 
@@ -105,7 +105,7 @@ describe Bandiera::Client do
       it 'returns false, and logs a warning' do
         stub_request(:get, url).to_timeout
 
-        logger.should_receive(:warn).once
+        logger.should_receive(:warn)
 
         response = subject.enabled?(group, feature)
 
