@@ -1,17 +1,19 @@
 require 'rest_client'
 require 'json'
+require 'logger'
+
+require_relative 'client/version'
 
 # TODO: add some intelligent way of using the bulk endpoints...
 
 module Bandiera
   class Client
-    attr_accessor :timeout
-    attr_reader :logger
+    attr_accessor :timeout, :logger, :client_name
 
     def initialize(base_uri = 'http://localhost', logger = Logger.new($stdout), client_name = nil)
       @base_uri    = base_uri
       @logger      = logger
-      @timeout     = 0.02 # 20ms default timeout
+      @timeout     = 0.2 # 0.4s (0.2 + 0.2) default timeout
       @client_name = client_name
 
       @base_uri << '/api' unless @base_uri.match(/\/api$/)
@@ -27,7 +29,7 @@ module Bandiera
       headers = {
         'User-Agent' => "Bandiera Ruby Client / #{Bandiera::Client::VERSION}"
       }
-      headers.merge! 'Bandiera-Client' => @client_name unless @client_name.nil?
+      headers.merge! 'Bandiera-Client' => client_name unless client_name.nil?
       headers
     end
 
