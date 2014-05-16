@@ -1,0 +1,20 @@
+= 2.0.2 / 15-May-2014
+
+  * Switch the HTTP library used from Typhoeus to RestClient.
+  * Set the default HTTP timeout to 0.2 seconds.
+  * Allow per-request timeout (and other RestClient::Resource options) to be passed through.
+
+= 2.0.1 / 07-May-2014
+
+  * Enable test suite to be run via Rake.
+  * Allow a client name to be passed through in the HTTP headers as 'Bandiera-Client'.
+  * Set the 'User-Agent' HTTP header to identify the requests as coming from this client.
+
+= 2.0.0 / 01-May-2014
+
+  * Update to support Bandiera API v2 and user_groups feature.
+
+= 1.0.0 / 24-Jan-2014
+
+  * Initial tagging of 1.0.0 codebase - support for Bandiera API v1.
+

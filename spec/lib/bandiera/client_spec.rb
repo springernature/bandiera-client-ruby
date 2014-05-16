@@ -13,9 +13,26 @@ describe Bandiera::Client do
 
     it 'sends it as part of the headers' do
       stub = stub_api_request(url, { 'response' => true }, { 'Bandiera-Client' => 'asdf' })
-      client = Bandiera::Client.new api_uri, logger, 'asdf'
-      client.enabled? group, feature
+      client = Bandiera::Client.new(api_uri, logger, 'asdf')
+      client.enabled?(group, feature)
       expect(stub).to have_been_requested
+    end
+  end
+
+  context 'when some RestClient::Resource options are passed' do
+    it 'passes them onto the RestClient::Resource' do
+      params          = {}
+      options         = { timeout: 24, open_timeout: 24 }
+      response_double = double(:response, body: '{ "response": false }')
+      resource_double = double(:resource, '[]' => double(get: response_double))
+
+      expect(RestClient::Resource)
+        .to receive(:new)
+        .with(api_uri, method: :get, timeout: 24, open_timeout: 24, headers: anything)
+        .once
+        .and_return { resource_double }
+
+      subject.enabled?('foo', 'bar', params, options)
     end
   end
 
