@@ -59,7 +59,10 @@ module Bandiera
       res = get(path, params, http_opts)
       logger.warn "#{error_msg_prefix} - #{res['warning']}" if res['warning']
       res['response']
-    rescue RestClient::Exception => error
+    rescue Errno::ECONNREFUSED, RestClient::Exception => error
+      # https://nature.airbrake.io/projects/90833/groups/74002774/notices/1176680636640746803
+      # TODO: Consider the other standard Unix errors.
+      # `Errno.constants # => [ ... ]`
       logger.warn("#{error_msg_prefix} - #{error.message}")
       return_upon_error
     end
