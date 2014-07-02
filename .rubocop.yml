@@ -6,5 +6,13 @@ BracesAroundHashParameters:
   Enabled: false
 
 DotPosition:
-  Enabled: false
+  EnforcedStyle: leading
 
+AlignParameters:
+  EnforcedStyle: with_fixed_indentation
+
+IndentHash:
+  EnforcedStyle: consistent
+
+StringLiterals:
+  EnforcedStyle: single_quotes

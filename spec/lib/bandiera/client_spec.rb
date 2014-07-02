@@ -30,7 +30,7 @@ describe Bandiera::Client do
         .to receive(:new)
         .with(api_uri, method: :get, timeout: 24, open_timeout: 24, headers: anything)
         .once
-        .and_return { resource_double }
+        .and_return(resource_double)
 
       subject.enabled?('foo', 'bar', params, options)
     end
@@ -47,7 +47,7 @@ describe Bandiera::Client do
           stub     = stub_api_request(url, 'response' => true)
           response = subject.enabled?(group, feature)
 
-          expect(response).to be_true
+          expect(response).to be true
           expect(stub).to have_been_requested
         end
 
@@ -71,11 +71,12 @@ describe Bandiera::Client do
         it 'returns a false, and logs a warning' do
           stub = stub_api_request(url, 'response' => false, 'warning' => 'The group does not exist')
 
-          logger.should_receive(:warn).once
+          expect(logger).to receive(:warn).once
+
 
           response = subject.enabled?(group, feature)
 
-          expect(response).to be_false
+          expect(response).to be false
           expect(stub).to have_been_requested
         end
       end
@@ -84,11 +85,11 @@ describe Bandiera::Client do
         it 'returns a false, and logs a warning' do
           stub = stub_api_request(url, 'response' => false, 'warning' => 'The feature does not exist')
 
-          logger.should_receive(:warn).once
+          expect(logger).to receive(:warn).once
 
           response = subject.enabled?(group, feature)
 
-          expect(response).to be_false
+          expect(response).to be false
           expect(stub).to have_been_requested
         end
       end
@@ -98,11 +99,11 @@ describe Bandiera::Client do
       it 'returns false, and logs a warning' do
         stub_request(:get, url).to_return(status: [0, ''])
 
-        logger.should_receive(:warn).once
+        expect(logger).to receive(:warn).once
 
         response = subject.enabled?(group, feature)
 
-        expect(response).to be_false
+        expect(response).to be false
       end
     end
 
@@ -110,11 +111,11 @@ describe Bandiera::Client do
       it 'returns false, and logs a warning' do
         stub_request(:get, url).to_return(status: 500, body: '')
 
-        logger.should_receive(:warn).once
+        expect(logger).to receive(:warn).once
 
         response = subject.enabled?(group, feature)
 
-        expect(response).to be_false
+        expect(response).to be false
       end
     end
 
@@ -122,11 +123,11 @@ describe Bandiera::Client do
       it 'returns false, and logs a warning' do
         stub_request(:get, url).to_timeout
 
-        logger.should_receive(:warn).once
+        expect(logger).to receive(:warn).once
 
         response = subject.enabled?(group, feature)
 
-        expect(response).to be_false
+        expect(response).to be false
       end
     end
   end
