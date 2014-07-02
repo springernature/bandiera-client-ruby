@@ -5,18 +5,18 @@ service from a Ruby application.
 
 This client is compatible with the [v2 Bandiera API][bandiera-api].
 
-**Current Version:** *2.1.0*
-**License:** [MIT][mit]
+**Current Version:** 2.1.0  
+**License:** [MIT][mit]  
 **Build Status:** [![Build Status][travis-img]][travis]
 
 ## Ruby Support:
 
 This client has been tested against the following ruby versions:
 
-*MRI:* 1.9.3-p385, 1.9.3-p448, 1.9.3-p484, 1.9.3-p545, 2.0.0-p0, 2.0.0-p247,
-2.0.0-p353, 2.0.0-p451, 2.1.0, 2.1.1, 2.1.2
-*JRuby:* 1.7.10, 1.7.11, 1.7.12
-*Rubinius:* 2.2.6, 2.2.7, 2.2.9, 2.2.10
+**MRI:** 1.9.3-p385, 1.9.3-p448, 1.9.3-p484, 1.9.3-p545, 2.0.0-p0, 2.0.0-p247,
+2.0.0-p353, 2.0.0-p451, 2.1.0, 2.1.1, 2.1.2  
+**JRuby:** 1.7.10, 1.7.11, 1.7.12  
+**Rubinius:** 2.2.6, 2.2.7, 2.2.9, 2.2.10
 
 # Usage
 
@@ -51,7 +51,7 @@ intended for different audiences.
 
 # License
 
-[&copy; 2014 Nature Publishing Group](LICENSE.txt).
+[&copy; 2014 Nature Publishing Group](LICENSE.txt).  
 Bandiera::Client (Ruby) is licensed under the [MIT License][mit].
 
 
