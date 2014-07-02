@@ -1,3 +1,8 @@
+= 2.1.0 / 02-July-2014
+
+  * Switch license to MIT.
+  * Handle connection refused errors.
+
 = 2.0.2 / 15-May-2014
 
   * Switch the HTTP library used from Typhoeus to RestClient.
