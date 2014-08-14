@@ -5,18 +5,18 @@ service from a Ruby application.
 
 This client is compatible with the [v2 Bandiera API][bandiera-api].
 
-**Current Version:** 2.2.0
-**License:** [MIT][mit]
-**Build Status:** [![Build Status][travis-img]][travis]
+**Current Version:** 2.2.0  
+**License:** [MIT][mit]  
+**Build Status:** [![Build Status][travis-img]][travis]  
 
 ## Ruby Support:
 
 This client has been tested against the following ruby versions:
 
 **MRI:** 1.9.3-p385, 1.9.3-p448, 1.9.3-p484, 1.9.3-p545, 2.0.0-p0, 2.0.0-p247,
-2.0.0-p353, 2.0.0-p451, 2.1.0, 2.1.1, 2.1.2
-**JRuby:** 1.7.10, 1.7.11, 1.7.12, 1.7.13
-**Rubinius:** 2.2.6, 2.2.7, 2.2.9, 2.2.10
+2.0.0-p353, 2.0.0-p451, 2.1.0, 2.1.1, 2.1.2  
+**JRuby:** 1.7.10, 1.7.11, 1.7.12, 1.7.13  
+**Rubinius:** 2.2.6, 2.2.7, 2.2.9, 2.2.10  
 
 # Usage
 
@@ -87,7 +87,7 @@ $bandiera = Bandiera::Client.new('http://bandiera.example.com')
 $bandiera.cache_strategy = :all
 ```
 
-# Cache Expiration
+### Cache Expiration
 
 The default cache lifetime is 5 seconds.  If you would like to alter this you
 can do so as follows:
