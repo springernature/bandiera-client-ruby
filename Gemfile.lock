@@ -14,7 +14,7 @@ GIT
 PATH
   remote: .
   specs:
-    bandiera-client (2.1.0)
+    bandiera-client (2.2.0)
       moneta
       rest_client
 
