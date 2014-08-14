@@ -15,6 +15,7 @@ PATH
   remote: .
   specs:
     bandiera-client (2.1.0)
+      moneta
       rest_client
 
 GEM
@@ -29,6 +30,7 @@ GEM
     diff-lcs (1.2.5)
     docile (1.1.5)
     method_source (0.8.2)
+    moneta (0.8.0)
     multi_json (1.10.1)
     multi_test (0.1.1)
     netrc (0.7.7)
