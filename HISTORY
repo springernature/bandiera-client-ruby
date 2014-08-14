@@ -1,3 +1,8 @@
+= 2.2.0 / 14-August-2014
+
+  * Add a configurable caching layer into the client.
+  * Expose methods to get raw responses from the Bandiera API
+
 = 2.1.0 / 02-July-2014
 
   * Switch license to MIT.
