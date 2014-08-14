@@ -19,8 +19,32 @@ module Bandiera
       @base_uri << '/api' unless @base_uri.match(/\/api$/)
     end
 
-    def enabled?(group, feature, params = { user_group: nil }, http_opts = {})
+    def enabled?(group, feature, params = {}, http_opts = {})
       get_feature(group, feature, params, http_opts)
+    end
+
+    def get_feature(group, feature, params = {}, http_opts = {})
+      path             = "/v2/groups/#{group}/features/#{feature}"
+      default_response = false
+      error_msg_prefix = "[Bandiera::Client#get_feature] '#{group} / #{feature} / #{params}'"
+
+      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
+    end
+
+    def get_features_for_group(group, params = {}, http_opts = {})
+      path             = "/v2/groups/#{group}/features"
+      default_response = {}
+      error_msg_prefix = "[Bandiera::Client#get_features_for_group] '#{group} / #{params}'"
+
+      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
+    end
+
+    def get_all(params = {}, http_opts = {})
+      path             = '/v2/all'
+      default_response = {}
+      error_msg_prefix = "[Bandiera::Client#get_all] '#{params}'"
+
+      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
     end
 
     private
@@ -29,30 +53,6 @@ module Bandiera
       headers = { 'User-Agent' => "Bandiera Ruby Client / #{Bandiera::Client::VERSION}" }
       headers.merge!('Bandiera-Client' => client_name) unless client_name.nil?
       headers
-    end
-
-    def get_feature(group, feature, params, http_opts)
-      path             = "/v2/groups/#{group}/features/#{feature}"
-      default_response = false
-      error_msg_prefix = "[Bandiera::Client#get_feature] '#{group} / #{feature} / #{params}'"
-
-      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
-    end
-
-    def get_features_for_group(group, params, http_opts)
-      path             = "/v2/groups/#{group}/features"
-      default_response = {}
-      error_msg_prefix = "[Bandiera::Client#get_features_for_group] '#{group} / #{params}'"
-
-      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
-    end
-
-    def get_all(params, http_opts)
-      path             = '/v2/all'
-      default_response = {}
-      error_msg_prefix = "[Bandiera::Client#get_all] '#{params}'"
-
-      get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
     end
 
     def get_and_handle_exceptions(path, params, http_opts, return_upon_error, error_msg_prefix)
@@ -79,7 +79,7 @@ module Bandiera
       params = {}
 
       passed_params.each do |key, val|
-        params[key] = val unless val.nil? || val.empty?
+        params[key] = val unless val.nil? || (val.respond_to?(:empty) && val.empty?)
       end
 
       params

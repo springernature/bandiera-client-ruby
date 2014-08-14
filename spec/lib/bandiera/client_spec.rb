@@ -37,57 +37,48 @@ describe Bandiera::Client do
   end
 
   describe '#enabled?' do
+    it 'calls #get_feature' do
+      expect(subject).to receive(:get_feature).once
+      subject.enabled?('foo', 'bar')
+    end
+  end
+
+  describe '#get_feature' do
     let(:group)   { 'pubserv' }
     let(:feature) { 'log-stats' }
     let(:url)     { "#{api_uri}/v2/groups/#{group}/features/#{feature}" }
 
     context 'all is ok' do
-      context 'and the group/feature exists' do
-        it 'returns the feature' do
-          stub     = stub_api_request(url, 'response' => true)
-          response = subject.enabled?(group, feature)
+      it 'returns the bandiera response' do
+        stub     = stub_api_request(url, 'response' => true)
+        response = subject.get_feature(group, feature)
 
-          expect(response).to be true
+        expect(response).to be true
+        expect(stub).to have_been_requested
+      end
+
+      context 'and the user has passed through some extra params' do
+        it 'passes them through to the API' do
+          stub = stub_request(:get, url)
+                   .with(query: { user_group: 'admin', user_id: '12345' })
+                   .to_return(
+                     body: JSON.generate('response' => true),
+                     headers: { 'Content-Type' => 'application/json' }
+                   )
+
+          subject.get_feature(group, feature, { user_group: 'admin', user_id: 12345 })
+
           expect(stub).to have_been_requested
-        end
-
-        context 'and the user has passed through a user_group param' do
-          it 'then this is passed through to the API' do
-            stub = stub_request(:get, url)
-                     .with(query: { user_group: 'admin' })
-                     .to_return(
-                       body: JSON.generate('response' => true),
-                       headers: { 'Content-Type' => 'application/json' }
-                     )
-
-            subject.enabled?(group, feature, user_group: 'admin')
-
-            expect(stub).to have_been_requested
-          end
         end
       end
 
-      context "but the group doesn't exist" do
-        it 'returns a false, and logs a warning' do
+      context 'but bandiera returns a warning along with the response' do
+        it 'logs the warning' do
           stub = stub_api_request(url, 'response' => false, 'warning' => 'The group does not exist')
 
           expect(logger).to receive(:warn).once
 
-
-          response = subject.enabled?(group, feature)
-
-          expect(response).to be false
-          expect(stub).to have_been_requested
-        end
-      end
-
-      context "and the group exists, but the feature doesn't" do
-        it 'returns a false, and logs a warning' do
-          stub = stub_api_request(url, 'response' => false, 'warning' => 'The feature does not exist')
-
-          expect(logger).to receive(:warn).once
-
-          response = subject.enabled?(group, feature)
+          response = subject.get_feature(group, feature)
 
           expect(response).to be false
           expect(stub).to have_been_requested
@@ -96,38 +87,197 @@ describe Bandiera::Client do
     end
 
     context 'bandiera is down' do
-      it 'returns false, and logs a warning' do
+      it 'returns a default response and logs a warning' do
         stub_request(:get, url).to_return(status: [0, ''])
 
         expect(logger).to receive(:warn).once
 
-        response = subject.enabled?(group, feature)
+        response = subject.get_feature(group, feature)
 
         expect(response).to be false
       end
     end
 
     context 'bandiera is having some problems' do
-      it 'returns false, and logs a warning' do
+      it 'returns a default response and logs a warning' do
         stub_request(:get, url).to_return(status: 500, body: '')
 
         expect(logger).to receive(:warn).once
 
-        response = subject.enabled?(group, feature)
+        response = subject.get_feature(group, feature)
 
         expect(response).to be false
       end
     end
 
     context 'bandiera times out' do
-      it 'returns false, and logs a warning' do
+      it 'returns a default response and logs a warning' do
         stub_request(:get, url).to_timeout
 
         expect(logger).to receive(:warn).once
 
-        response = subject.enabled?(group, feature)
+        response = subject.get_feature(group, feature)
 
         expect(response).to be false
+      end
+    end
+  end
+
+  describe '#get_features_for_group' do
+    let(:group) { 'pubserv' }
+    let(:url)   { "#{api_uri}/v2/groups/#{group}/features" }
+
+    context 'all is ok' do
+      it 'returns the bandiera response' do
+        feature_hash = { 'show-stuff' => true, 'show-other-stuff' => false }
+        stub         = stub_api_request(url, 'response' => feature_hash )
+        response     = subject.get_features_for_group(group)
+
+        expect(response).to eq(feature_hash)
+        expect(stub).to have_been_requested
+      end
+
+      context 'and the user has passed through some extra params' do
+        it 'passes them through to the API' do
+          stub = stub_request(:get, url)
+                   .with(query: { user_group: 'admin', user_id: '12345' })
+                   .to_return(
+                     body: JSON.generate('response' => true),
+                     headers: { 'Content-Type' => 'application/json' }
+                   )
+
+          subject.get_features_for_group(group, { user_group: 'admin', user_id: 12345 })
+
+          expect(stub).to have_been_requested
+        end
+      end
+
+      context 'but bandiera returns a warning along with the response' do
+        it 'logs the warning' do
+          stub = stub_api_request(url, 'response' => {}, 'warning' => 'The group does not exist')
+
+          expect(logger).to receive(:warn).once
+
+          response = subject.get_features_for_group(group)
+
+          expect(response).to be {}
+          expect(stub).to have_been_requested
+        end
+      end
+    end
+
+    context 'bandiera is down' do
+      it 'returns a default response and logs a warning' do
+        stub_request(:get, url).to_return(status: [0, ''])
+
+        expect(logger).to receive(:warn).once
+
+        response = subject.get_features_for_group(group)
+
+        expect(response).to be {}
+      end
+    end
+
+    context 'bandiera is having some problems' do
+      it 'returns a default response and logs a warning' do
+        stub_request(:get, url).to_return(status: 500, body: '')
+
+        expect(logger).to receive(:warn).once
+
+        response = subject.get_features_for_group(group)
+
+        expect(response).to be {}
+      end
+    end
+
+    context 'bandiera times out' do
+      it 'returns a default response and logs a warning' do
+        stub_request(:get, url).to_timeout
+
+        expect(logger).to receive(:warn).once
+
+        response = subject.get_features_for_group(group)
+
+        expect(response).to be {}
+      end
+    end
+  end
+
+  describe '#get_all' do
+    let(:url) { "#{api_uri}/v2/all" }
+
+    context 'all is ok' do
+      it 'returns the bandiera response' do
+        feature_hash = { 'pubserv' => { 'show-stuff' => true, 'show-other-stuff' => false } }
+        stub         = stub_api_request(url, 'response' => feature_hash )
+        response     = subject.get_all
+
+        expect(response).to eq(feature_hash)
+        expect(stub).to have_been_requested
+      end
+
+      context 'and the user has passed through some extra params' do
+        it 'passes them through to the API' do
+          stub = stub_request(:get, url)
+                   .with(query: { user_group: 'admin', user_id: '12345' })
+                   .to_return(
+                     body: JSON.generate('response' => {}),
+                     headers: { 'Content-Type' => 'application/json' }
+                   )
+
+          subject.get_all({ user_group: 'admin', user_id: 12345 })
+
+          expect(stub).to have_been_requested
+        end
+      end
+
+      context 'but bandiera returns a warning along with the response' do
+        it 'logs the warning' do
+          stub = stub_api_request(url, 'response' => {}, 'warning' => 'The group does not exist')
+
+          expect(logger).to receive(:warn).once
+
+          response = subject.get_all
+
+          expect(response).to be {}
+          expect(stub).to have_been_requested
+        end
+      end
+    end
+
+    context 'bandiera is down' do
+      it 'returns a default response and logs a warning' do
+        stub_request(:get, url).to_return(status: [0, ''])
+
+        expect(logger).to receive(:warn).once
+
+        response = subject.get_all
+
+        expect(response).to be {}
+      end
+    end
+
+    context 'bandiera is having some problems' do
+      it 'returns a default response and logs a warning' do
+        stub_request(:get, url).to_return(status: 500, body: '')
+
+        expect(logger).to receive(:warn).once
+
+        response = subject.get_all
+
+        expect(response).to be {}
+      end
+    end
+
+    context 'bandiera times out' do
+      it 'returns a default response and logs a warning' do
+        stub_request(:get, url).to_timeout
+
+        expect(logger).to receive(:warn).once
+
+        response = subject.get_all
+
+        expect(response).to be {}
       end
     end
   end
