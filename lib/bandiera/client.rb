@@ -115,7 +115,7 @@ module Bandiera
       block.call(res['response']) if block
       res['response']
     rescue *EXCEPTIONS_TO_HANDLE => error
-      logger.warn("#{error_msg_prefix} - #{error.message}")
+      logger.warn("#{error_msg_prefix} - #{error.class} - #{error.message}")
       return_upon_error
     end
 
