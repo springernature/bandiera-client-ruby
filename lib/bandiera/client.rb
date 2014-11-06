@@ -18,7 +18,7 @@ module Bandiera
       @logger         = logger
       @timeout        = 0.2 # 0.4s (0.2 + 0.2) default timeout
       @client_name    = client_name
-      @cache          = Moneta.new(:Memory, expires: true)
+      @cache          = Moneta.new(:LRUHash, expires: true)
       @cache_ttl      = 5 # 5 seconds
       @cache_strategy = :group
     end
@@ -105,15 +105,16 @@ module Bandiera
       headers
     end
 
+    EXCEPTIONS_TO_HANDLE = (
+      Errno.constants.map { |cla| Errno.const_get(cla) } + [RestClient::Exception]
+    ).flatten
+
     def get_and_handle_exceptions(path, params, http_opts, return_upon_error, error_msg_prefix, &block)
       res = get(path, params, http_opts)
       logger.warn "#{error_msg_prefix} - #{res['warning']}" if res['warning']
       block.call(res['response']) if block
       res['response']
-    rescue Errno::ECONNREFUSED, RestClient::Exception => error
-      # https://nature.airbrake.io/projects/90833/groups/74002774/notices/1176680636640746803
-      # TODO: Consider the other standard Unix errors.
-      # `Errno.constants # => [ ... ]`
+    rescue *EXCEPTIONS_TO_HANDLE => error
       logger.warn("#{error_msg_prefix} - #{error.message}")
       return_upon_error
     end
