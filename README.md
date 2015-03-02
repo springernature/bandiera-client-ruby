@@ -5,7 +5,7 @@ service from a Ruby application.
 
 This client is compatible with the [v2 Bandiera API][bandiera-api].
 
-**Current Version:** 2.2.1
+**Current Version:** 2.2.2
 **License:** [MIT][mit]
 **Build Status:** [![Build Status][travis-img]][travis]
 
