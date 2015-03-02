@@ -106,7 +106,7 @@ module Bandiera
     end
 
     EXCEPTIONS_TO_HANDLE = (
-      Errno.constants.map { |cla| Errno.const_get(cla) } + [RestClient::Exception]
+      Errno.constants.map { |cla| Errno.const_get(cla) } + [RestClient::Exception, JSON::ParserError]
     ).flatten
 
     def get_and_handle_exceptions(path, params, http_opts, return_upon_error, error_msg_prefix, &block)

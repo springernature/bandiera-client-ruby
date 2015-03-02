@@ -419,7 +419,7 @@ describe Bandiera::Client do
 
     context 'bandiera is having some problems' do
       it 'returns a default response and logs a warning' do
-        stub_request(:get, url).to_return(status: 500, body: '')
+        stub_request(:get, url).to_return(status: 200, body: '<html></html>')
 
         expect(logger).to receive(:warn).once
 
