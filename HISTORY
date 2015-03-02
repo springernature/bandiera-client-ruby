@@ -1,3 +1,12 @@
+= 2.2.2 / 02-March-2015
+
+  * Handle non-JSON responses correctly (these can happen due to proxy issues etc).
+
+= 2.2.1 / 19-January-2015
+
+  * Small updates for Ruby 2.2.0 compatability.
+  * Documentation updates.
+
 = 2.2.0 / 14-August-2014
 
   * Add a configurable caching layer into the client.

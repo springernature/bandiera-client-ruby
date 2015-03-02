@@ -1,5 +1,5 @@
 module Bandiera
   class Client
-    VERSION = '2.2.1'
+    VERSION = '2.2.2'
   end
 end
