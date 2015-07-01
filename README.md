@@ -1,13 +1,13 @@
 # Bandiera::Client (Ruby)
 
-This is a client for talking to the [Bandiera][bandiera] feature flagging
-service from a Ruby application.
+This is a client for talking to the [Bandiera][bandiera] feature flagging service from a Ruby application.
 
 This client is compatible with the [v2 Bandiera API][bandiera-api].
 
-**Current Version:** 2.2.2
-**License:** [MIT][mit]
-**Build Status:** [![Build Status][travis-img]][travis]
+[![Gem version][shield-gem]][info-gem]
+[![Build status][shield-build]][info-build]
+[![Dependencies][shield-dependencies]][info-dependencies]
+[![MIT licensed][shield-license]][info-license]
 
 ## Ruby Support:
 
@@ -26,22 +26,36 @@ Then interact with a Bandiera server like so:
 ```ruby
 require 'bandiera/client'
 
-$bandiera = Bandiera::Client.new('http://bandiera.example.com')
+client = Bandiera::Client.new('http://bandiera-demo.herokuapp.com')
+params = {}
 
-if $bandiera.enabled?('pubserv', 'show-new-search')
+if client.enabled?('pubserv', 'show-new-search', params)
   # show the new experimental search function
 end
 ```
 
-The `$bandiera.enabled?` command takes two arguments - the 'feature group',
+The `client.enabled?` command takes two main arguments - the 'feature group',
 and the 'feature name'.  This is because in Bandiera, features are organised
-in groups as it is intented as a service for multiple applications to use at
+into groups as it is intented as a service for multiple applications to use at
 the same time - this organisation allows separation of feature flags that are
 intended for different audiences.
 
+`client.enabled?` also takes an optional `params` hash, this is
+for use with some of the more advanced features in Bandiera - user group and percentage based flags.  It is in this params hash you pass in your
+`user_group` and `user_id`, i.e.:
+
+```ruby
+client.enabled?('pubserv', 'show-new-search',
+  { user_id: '1234567', user_group: 'Administrators' })
+```
+
+For more information on these advanced features, please see the Bandiera wiki:
+
+https://github.com/nature/bandiera/wiki/How-Feature-Flags-Work#feature-flags-in-bandiera
+
 ## Caching
 
-Bandiera::Client has a small layer of caching built into it in order to:
+`Bandiera::Client#enabled?` has a small layer of caching built into it in order to:
 
 1. Reduce the amount of HTTP requests made to the Bandiera server
 2. Make things faster
@@ -78,8 +92,8 @@ Bandiera instance.
 #### Changing the Cache Strategy
 
 ```ruby
-$bandiera = Bandiera::Client.new('http://bandiera.example.com')
-$bandiera.cache_strategy = :all
+client = Bandiera::Client.new('http://bandiera-demo.herokuapp.com')
+client.cache_strategy = :all
 ```
 
 ### Cache Expiration
@@ -88,10 +102,31 @@ The default cache lifetime is 5 seconds.  If you would like to alter this you
 can do so as follows:
 
 ```ruby
-$bandiera = Bandiera::Client.new('http://bandiera.example.com')
-$bandiera.cache_ttl = 10 # 10 seconds
+client = Bandiera::Client.new('http://bandiera-demo.herokuapp.com')
+client.cache_ttl = 10 # 10 seconds
 ```
 
+# Direct API Access
+
+If you'd prefer not to use the `enabled?` method for featching feature flag values, the following methods are available...
+
+Get features for all groups:
+
+```ruby
+client.get_all(params)
+```
+
+Get features for a group:
+
+```ruby
+client.get_features_for_group('pubserv', params)
+```
+
+Get an individual feature:
+
+```ruby
+client.get_feature('pubserv', 'show-article-metrics', params)
+```
 
 # Development
 
@@ -107,5 +142,13 @@ Bandiera::Client (Ruby) is licensed under the [MIT License][mit].
 [mit]: http://opensource.org/licenses/mit-license.php
 [bandiera]: https://github.com/nature/bandiera
 [bandiera-api]: https://github.com/nature/bandiera/wiki/API-Documentation
-[travis]: https://travis-ci.org/nature/bandiera-client-ruby
-[travis-img]: https://travis-ci.org/nature/bandiera-client-ruby.svg?branch=master
+
+
+[info-dependencies]: https://gemnasium.com/nature/bandiera-client-node
+[info-license]: LICENSE
+[info-gem]: https://rubygems.org/gems/bandiera-client
+[info-build]: https://travis-ci.org/nature/bandiera-client-ruby
+[shield-dependencies]: https://img.shields.io/gemnasium/nature/bandiera-client-ruby.svg
+[shield-license]: https://img.shields.io/badge/license-MIT-blue.svg
+[shield-gem]: https://img.shields.io/gem/v/bandiera-client.svg
+[shield-build]: https://img.shields.io/travis/nature/bandiera-client-ruby/master.svg
