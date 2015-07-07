@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Bandiera is a simple, stand-alone feature flagging service that is not tied to any existing web framework or language. This is a client for talking to the web service.'
   spec.summary       = 'Simple feature flagging API client.'
   spec.homepage      = 'https://github.com/nature/bandiera-client-ruby'
-  spec.license       = 'GPL-3'
+  spec.license       = 'MIT'
 
   spec.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
   spec.test_files    = Dir.glob('spec/*_spec.rb')
