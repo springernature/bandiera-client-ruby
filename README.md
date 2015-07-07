@@ -142,7 +142,7 @@ Bandiera::Client (Ruby) is licensed under the [MIT License][mit].
 [mit]: http://opensource.org/licenses/mit-license.php
 [bandiera]: https://github.com/nature/bandiera
 [bandiera-api]: https://github.com/nature/bandiera/wiki/API-Documentation
-[info-dependencies]: https://gemnasium.com/nature/bandiera-client-node
+[info-dependencies]: https://gemnasium.com/nature/bandiera-client-ruby
 [info-license]: LICENSE
 [info-gem]: https://rubygems.org/gems/bandiera-client
 [info-build]: https://travis-ci.org/nature/bandiera-client-ruby
