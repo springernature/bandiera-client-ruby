@@ -9,10 +9,10 @@ describe Bandiera::Client do
   context 'when a client name is provided' do
     let(:group)   { 'pubserv' }
     let(:feature) { 'log-stats' }
-    let(:url)     { "#{api_uri}/v2/groups/#{group}/features" }
+    let(:url)     { "#{api_uri}/v2/groups/#{group}/features/#{feature}" }
 
     it 'sends it as part of the headers' do
-      stub = stub_api_request(url, { 'response' => {} }, { 'Bandiera-Client' => 'asdf' })
+      stub   = stub_api_request(url, { 'response' => {} }, { 'Bandiera-Client' => 'asdf' })
       client = Bandiera::Client.new(api_uri, logger, 'asdf')
       client.enabled?(group, feature)
       expect(stub).to have_been_requested
@@ -36,83 +36,6 @@ describe Bandiera::Client do
     end
   end
 
-  describe '#enabled?' do
-    context 'with cache strategy :single_feature' do
-      before do
-        subject.cache_strategy = :single_feature
-      end
-
-      context 'and an empty cache' do
-        it 'calls #get_feature' do
-          expect(subject).to receive(:get_feature).once
-          subject.enabled?('foo', 'bar')
-        end
-      end
-
-      context 'and a primed cache' do
-        before do
-          cache_key = subject.send(:build_cache_key, 'foo', 'bar', {})
-          subject.cache.store(cache_key, false)
-        end
-
-        it 'does not call #get_feature' do
-          expect(subject).to_not receive(:get_feature)
-          subject.enabled?('foo', 'bar')
-        end
-      end
-    end
-
-    context 'with cache strategy :group' do
-      before do
-        subject.cache_strategy = :group
-      end
-
-      context 'and an empty cache' do
-        it 'calls #get_features_for_group' do
-          expect(subject).to receive(:get_features_for_group).once
-          subject.enabled?('foo', 'bar')
-        end
-      end
-
-      context 'and a primed cache' do
-        before do
-          cache_key = subject.send(:build_cache_key, 'foo', 'bar', {})
-          subject.cache.store(cache_key, false)
-        end
-
-        it 'does not call #get_features_for_group' do
-          expect(subject).to_not receive(:get_features_for_group)
-          subject.enabled?('foo', 'bar')
-        end
-      end
-    end
-
-    context 'with cache strategy :all' do
-      before do
-        subject.cache_strategy = :all
-      end
-
-      context 'and an empty cache' do
-        it 'calls #get_all' do
-          expect(subject).to receive(:get_all).once
-          subject.enabled?('foo', 'bar')
-        end
-      end
-
-      context 'and a primed cache' do
-        before do
-          cache_key = subject.send(:build_cache_key, 'foo', 'bar', {})
-          subject.cache.store(cache_key, false)
-        end
-
-        it 'does not call #get_all' do
-          expect(subject).to_not receive(:get_all)
-          subject.enabled?('foo', 'bar')
-        end
-      end
-    end
-  end
-
   describe '#get_feature' do
     let(:group)   { 'pubserv' }
     let(:feature) { 'log-stats' }
@@ -125,14 +48,6 @@ describe Bandiera::Client do
 
         expect(response).to be true
         expect(stub).to have_been_requested
-      end
-
-      it 'stores the feature value in the cache' do
-        stub_api_request(url, 'response' => true)
-        cache_key = subject.send(:build_cache_key, group, feature, {})
-
-        subject.get_feature(group, feature)
-        expect(subject.cache.key?(cache_key)).to be true
       end
 
       context 'and the user has passed through some extra params' do
@@ -174,14 +89,6 @@ describe Bandiera::Client do
 
         expect(response).to be false
       end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_return(status: [0, ''])
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_feature(group, feature)
-      end
     end
 
     context 'bandiera is having some problems' do
@@ -194,14 +101,6 @@ describe Bandiera::Client do
 
         expect(response).to be false
       end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_return(status: 500, body: '')
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_feature(group, feature)
-      end
     end
 
     context 'bandiera times out' do
@@ -213,14 +112,6 @@ describe Bandiera::Client do
         response = subject.get_feature(group, feature)
 
         expect(response).to be false
-      end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_timeout
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_feature(group, feature)
       end
     end
   end
@@ -237,19 +128,6 @@ describe Bandiera::Client do
 
         expect(response).to eq(feature_hash)
         expect(stub).to have_been_requested
-      end
-
-      it 'stores the feature values in the cache' do
-        feature_hash = { 'show-stuff' => true, 'show-other-stuff' => false }
-        stub_api_request(url, 'response' => feature_hash)
-
-        subject.get_features_for_group(group)
-
-        cache_key = subject.send(:build_cache_key, group, 'show-stuff', {})
-        expect(subject.cache.key?(cache_key)).to be true
-
-        cache_key = subject.send(:build_cache_key, group, 'show-other-stuff', {})
-        expect(subject.cache.key?(cache_key)).to be true
       end
 
       context 'and the user has passed through some extra params' do
@@ -291,14 +169,6 @@ describe Bandiera::Client do
 
         expect(response).to be {}
       end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_return(status: [0, ''])
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_features_for_group(group)
-      end
     end
 
     context 'bandiera is having some problems' do
@@ -311,14 +181,6 @@ describe Bandiera::Client do
 
         expect(response).to be {}
       end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_return(status: 500, body: '')
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_features_for_group(group)
-      end
     end
 
     context 'bandiera times out' do
@@ -330,14 +192,6 @@ describe Bandiera::Client do
         response = subject.get_features_for_group(group)
 
         expect(response).to be {}
-      end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_timeout
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_features_for_group(group)
       end
     end
   end
@@ -353,19 +207,6 @@ describe Bandiera::Client do
 
         expect(response).to eq(feature_hash)
         expect(stub).to have_been_requested
-      end
-
-      it 'stores the feature values in the cache' do
-        feature_hash = { 'pubserv' => { 'show-stuff' => true, 'show-other-stuff' => false } }
-        stub_api_request(url, 'response' => feature_hash)
-
-        subject.get_all
-
-        cache_key = subject.send(:build_cache_key, 'pubserv', 'show-stuff', {})
-        expect(subject.cache.key?(cache_key)).to be true
-
-        cache_key = subject.send(:build_cache_key, 'pubserv', 'show-other-stuff', {})
-        expect(subject.cache.key?(cache_key)).to be true
       end
 
       context 'and the user has passed through some extra params' do
@@ -407,14 +248,6 @@ describe Bandiera::Client do
 
         expect(response).to be {}
       end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_return(status: [0, ''])
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_all
-      end
     end
 
     context 'bandiera is having some problems' do
@@ -427,14 +260,6 @@ describe Bandiera::Client do
 
         expect(response).to be {}
       end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_return(status: 500, body: '')
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_all
-      end
     end
 
     context 'bandiera times out' do
@@ -446,14 +271,6 @@ describe Bandiera::Client do
         response = subject.get_all
 
         expect(response).to be {}
-      end
-
-      it 'does not store anything in the cache' do
-        stub_request(:get, url).to_timeout
-
-        expect(subject.cache).to_not receive(:store)
-
-        subject.get_all
       end
     end
   end
