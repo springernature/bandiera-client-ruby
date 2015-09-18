@@ -12,3 +12,4 @@ require 'macmillan/utils/test_helpers/simplecov_helper'
 require 'pry'
 
 require 'bandiera/client'
+require 'bandiera/middleware'
