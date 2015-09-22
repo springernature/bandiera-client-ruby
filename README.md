@@ -34,15 +34,9 @@ if client.enabled?('pubserv', 'show-new-search', params)
 end
 ```
 
-The `client.enabled?` command takes two main arguments - the 'feature group',
-and the 'feature name'.  This is because in Bandiera, features are organised
-into groups as it is intented as a service for multiple applications to use at
-the same time - this organisation allows separation of feature flags that are
-intended for different audiences.
+The `client.enabled?` command takes two main arguments - the 'feature group', and the 'feature name'.  This is because in Bandiera, features are organised into groups as it is intented as a service for multiple applications to use at the same time - this organisation allows separation of feature flags that are intended for different audiences.
 
-`client.enabled?` also takes an optional `params` hash, this is
-for use with some of the more advanced features in Bandiera - user group and percentage based flags.  It is in this params hash you pass in your
-`user_group` and `user_id`, i.e.:
+`client.enabled?` also takes an optional `params` hash, this is for use with some of the more advanced features in Bandiera - user group and percentage based flags.  It is in this params hash you pass in your `user_group` and `user_id`, i.e.:
 
 ```ruby
 client.enabled?('pubserv', 'show-new-search',
@@ -53,60 +47,17 @@ For more information on these advanced features, please see the Bandiera wiki:
 
 https://github.com/nature/bandiera/wiki/How-Feature-Flags-Work#feature-flags-in-bandiera
 
-## Caching
+# Performance
 
-`Bandiera::Client#enabled?` has a small layer of caching built into it in order to:
+Using the `client.enabled?` method all over your codebase isn't the most efficient way of working with Bandiera as every time you call `enabled?` you will make a HTTP request to the Bandiera server.
 
-1. Reduce the amount of HTTP requests made to the Bandiera server
-2. Make things faster
+One way of working more efficiently is using the [Direct API Access](#direct-api-access) methods, to fetch all the feature flags for a given group (or even **all** of the feature flags in the Bandiera server) in one request. You can then hold these as you please in your application and call on the values when needed.
 
-### Strategies
+Another approach is to use the Bandiera::Middleware class supplied in this gem.  This can be used in conjunction with other middlewares for identifying your currently logged in user and assigning them a UUID to enable all of the most advanced features in Bandiera very simply.
 
-There are three request/caching strategies you can use with Bandiera::Client.
+[See the blog post on cruft.io for more information on how Bandiera::Client is used at Nature.](http://cruft.io)
 
-**:single_feature**
-
-This strategy calls the Bandiera API for each new .enabled? request, and stores
-the response in it's local cache. Subsequent `.enabled?` requests (using the
-same arguments) will read from the cache until it has expired.  This is the
-**least** efficient strategy in terms of reducing HTTP requests and speed.
-
-**:group**
-
-This strategy calls the Bandiera API **once** for each feature flag group
-requested, and then stores the resulting feature flag values in the cache.
-This means that all subsequent calls to `.enabled?` for the same group will not
-perform a HTTP request and instead read from the cache until it has expired.
-This is a good compromise in terms of speed and number of HTTP requests, **and
-is the default caching strategy**.
-
-**:all**
-
-This strategy calls the Bandiera API **once** and fetches/caches all feature
-flag values locally. All subsequent calls to `.enabled?` read from the cache
-until it has expired. This strategy is obviously the most efficient in terms of
-the number of HTTP requests if you are requesting flags from across multiple
-groups, but might not be the fastest if there are **lots** of flags in your
-Bandiera instance.
-
-#### Changing the Cache Strategy
-
-```ruby
-client = Bandiera::Client.new('http://bandiera-demo.herokuapp.com')
-client.cache_strategy = :all
-```
-
-### Cache Expiration
-
-The default cache lifetime is 5 seconds.  If you would like to alter this you
-can do so as follows:
-
-```ruby
-client = Bandiera::Client.new('http://bandiera-demo.herokuapp.com')
-client.cache_ttl = 10 # 10 seconds
-```
-
-# Direct API Access
+<a name="direct-api-access"></a># Direct API Access
 
 If you'd prefer not to use the `enabled?` method for featching feature flag values, the following methods are available...
 
@@ -114,19 +65,37 @@ Get features for all groups:
 
 ```ruby
 client.get_all(params)
+  # gives:
+  # {
+  #   'group1' => {
+  #     'feature1' => true,
+  #     'feature2' => false
+  #   },
+  #   'group2' => {
+  #     'feature1' => false
+  #   },
+  # }
 ```
 
 Get features for a group:
 
 ```ruby
 client.get_features_for_group('pubserv', params)
+  # gives:
+  # {
+  #   'feature1' => true,
+  #   'feature2' => false
+  # }
 ```
 
 Get an individual feature:
 
 ```ruby
 client.get_feature('pubserv', 'show-article-metrics', params)
+  # gives: true/false
 ```
+
+As with the `enabled?` method the `params` hash is for passing in your `user_group` and `user_id` values if you are using some of the more advanced features in Bandiera.
 
 # Development
 
