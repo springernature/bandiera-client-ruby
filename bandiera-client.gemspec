@@ -8,11 +8,11 @@ require 'bandiera/client/version'
 Gem::Specification.new do |spec|
   spec.name          = 'bandiera-client'
   spec.version       = Bandiera::Client::VERSION
-  spec.authors       = ['Macmillan Science and Education (New Publsihing Platforms)']
+  spec.authors       = ['Springer Nature']
   spec.email         = ['npp-developers@macmillan.com']
   spec.description   = 'Bandiera is a simple, stand-alone feature flagging service that is not tied to any existing web framework or language. This is a client for talking to the web service.'
   spec.summary       = 'Simple feature flagging API client.'
-  spec.homepage      = 'https://github.com/nature/bandiera-client-ruby'
+  spec.homepage      = 'https://github.com/springernature/bandiera-client-ruby'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files`.split($INPUT_RECORD_SEPARATOR)
