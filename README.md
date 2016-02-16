@@ -45,7 +45,7 @@ client.enabled?('pubserv', 'show-new-search',
 
 For more information on these advanced features, please see the Bandiera wiki:
 
-https://github.com/nature/bandiera/wiki/How-Feature-Flags-Work#feature-flags-in-bandiera
+https://github.com/springernature/bandiera/wiki/How-Feature-Flags-Work#feature-flags-in-bandiera
 
 # Performance
 
@@ -104,18 +104,18 @@ As with the `enabled?` method the `params` hash is for passing in your `user_gro
 
 # License
 
-[&copy; 2014 Nature Publishing Group](LICENSE.txt).
+[&copy; 2014 Springer Nature](LICENSE.txt).
 Bandiera::Client (Ruby) is licensed under the [MIT License][mit].
 
 
 [mit]: http://opensource.org/licenses/mit-license.php
-[bandiera]: https://github.com/nature/bandiera
-[bandiera-api]: https://github.com/nature/bandiera/wiki/API-Documentation
-[info-dependencies]: https://gemnasium.com/nature/bandiera-client-ruby
+[bandiera]: https://github.com/springernature/bandiera
+[bandiera-api]: https://github.com/springernature/bandiera/wiki/API-Documentation
+[info-dependencies]: https://gemnasium.com/springernature/bandiera-client-ruby
 [info-license]: LICENSE
 [info-gem]: https://rubygems.org/gems/bandiera-client
-[info-build]: https://travis-ci.org/nature/bandiera-client-ruby
-[shield-dependencies]: https://img.shields.io/gemnasium/nature/bandiera-client-ruby.svg
+[info-build]: https://travis-ci.org/springernature/bandiera-client-ruby
+[shield-dependencies]: https://img.shields.io/gemnasium/springernature/bandiera-client-ruby.svg
 [shield-license]: https://img.shields.io/badge/license-MIT-blue.svg
 [shield-gem]: https://img.shields.io/gem/v/bandiera-client.svg
-[shield-build]: https://img.shields.io/travis/nature/bandiera-client-ruby/master.svg
+[shield-build]: https://img.shields.io/travis/springernature/bandiera-client-ruby/master.svg

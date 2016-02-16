@@ -9,7 +9,7 @@ module Bandiera
   # 1. Performance - Using this middleware, you will only call the Bandiera server once per-request (in contrast to using the `enabled?` method where you will make one request per-use).
   # 2. Better Quality Code - If you use the more advanced features in Bandiera (user groups and percentages) you will no longer need to pass around user objects and UUIDs in your code.  This does assume the use of other middlewares to supply user objects and UUIDs though.
   #
-  # This middleware can be used in conjunction with the {Macmillan::Utils::Middleware::Uuid} (or one of your own design) to automatically generate UUIDs for your users. See https://github.com/nature/bandiera/wiki for more information on this approach.
+  # This middleware can be used in conjunction with the {Macmillan::Utils::Middleware::Uuid} (or one of your own design) to automatically generate UUIDs for your users. See https://github.com/springernature/bandiera/wiki for more information on this approach.
   #
   # @since 3.0.0
   #
