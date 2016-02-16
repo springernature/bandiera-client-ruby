@@ -1,3 +1,14 @@
+= 3.0.1 / 16-February-2016
+
+  * Move the codebase into the `springernature` organisation and update the copyright.
+
+= 3.0.0 / 23-September-2015
+
+  * Add in the Bandiera::Middleware for making rack applications more efficient in the way they use Bandiera.
+  * Removed complex caching code from client - preferred strategy is to now use the middleware.
+  * Documentation updates
+  * Correction of License referred to in the gemspec
+
 = 2.2.2 / 02-March-2015
 
   * Handle non-JSON responses correctly (these can happen due to proxy issues etc).
@@ -36,4 +47,3 @@
 = 1.0.0 / 24-Jan-2014
 
   * Initial tagging of 1.0.0 codebase - support for Bandiera API v1.
-
