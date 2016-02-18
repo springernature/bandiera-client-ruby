@@ -69,7 +69,8 @@ describe Bandiera::Client do
         it 'logs the warning' do
           stub = stub_api_request(url, 'response' => false, 'warning' => 'The group does not exist')
 
-          expect(logger).to receive(:warn).once
+          # 2 calls - one for the request, one for the warning
+          expect(logger).to receive(:debug).twice
 
           response = subject.get_feature(group, feature)
 
@@ -149,7 +150,8 @@ describe Bandiera::Client do
         it 'logs the warning' do
           stub = stub_api_request(url, 'response' => {}, 'warning' => 'The group does not exist')
 
-          expect(logger).to receive(:warn).once
+          # 2 calls - one for the request, one for the warning
+          expect(logger).to receive(:debug).twice
 
           response = subject.get_features_for_group(group)
 
@@ -228,7 +230,8 @@ describe Bandiera::Client do
         it 'logs the warning' do
           stub = stub_api_request(url, 'response' => {}, 'warning' => 'The group does not exist')
 
-          expect(logger).to receive(:warn).once
+          # 2 calls - one for the request, one for the warning
+          expect(logger).to receive(:debug).twice
 
           response = subject.get_all
 

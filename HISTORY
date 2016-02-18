@@ -1,3 +1,7 @@
+= 3.0.2 / 18-February-2016
+
+  * Reduce the log level for missing user_id/user_group params to DEBUG (they were too noisy).
+
 = 3.0.1 / 16-February-2016
 
   * Move the codebase into the `springernature` organisation and update the copyright.
