@@ -54,7 +54,7 @@ module Bandiera
       default_response = false
       error_msg_prefix = "[Bandiera::Client#get_feature] '#{group} / #{feature} / #{params}'"
 
-      logger.debug "[Bandiera::Client#get_feature] calling #{path} with params: #{params}"
+      logger.debug("[Bandiera::Client#get_feature] calling #{path} with params: #{params}")
 
       get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
     end
@@ -76,7 +76,7 @@ module Bandiera
       default_response = {}
       error_msg_prefix = "[Bandiera::Client#get_features_for_group] '#{group} / #{params}'"
 
-      logger.debug "[Bandiera::Client#get_features_for_group] calling #{path} with params: #{params}"
+      logger.debug("[Bandiera::Client#get_features_for_group] calling #{path} with params: #{params}")
 
       get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
     end
@@ -94,7 +94,7 @@ module Bandiera
       default_response = {}
       error_msg_prefix = "[Bandiera::Client#get_all] '#{params}'"
 
-      logger.debug "[Bandiera::Client#get_all] calling #{path} with params: #{params}"
+      logger.debug("[Bandiera::Client#get_all] calling #{path} with params: #{params}")
 
       get_and_handle_exceptions(path, params, http_opts, default_response, error_msg_prefix)
     end
@@ -113,7 +113,7 @@ module Bandiera
 
     def get_and_handle_exceptions(path, params, http_opts, return_upon_error, error_msg_prefix, &block)
       res = get(path, params, http_opts)
-      logger.warn "#{error_msg_prefix} - #{res['warning']}" if res['warning']
+      logger.debug("#{error_msg_prefix} - #{res['warning']}") if res['warning']
       block.call(res['response']) if block
       res['response']
     rescue *EXCEPTIONS_TO_HANDLE => error
