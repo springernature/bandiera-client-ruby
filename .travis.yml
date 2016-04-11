@@ -9,7 +9,6 @@ rvm:
   - 2.2
   - 2.3.0
   - ruby
-  - ruby-head
   - jruby
 
 # Ensure we don't build for *every* commit (doesn't apply to PR builds)

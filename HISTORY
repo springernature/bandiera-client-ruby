@@ -1,3 +1,7 @@
+= 3.0.3 / 11-April-2016
+
+  * Stop the client from logging warnings
+
 = 3.0.2 / 18-February-2016
 
   * Reduce the log level for missing user_id/user_group params to DEBUG (they were too noisy).
