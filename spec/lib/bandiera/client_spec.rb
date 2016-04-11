@@ -81,10 +81,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera is down' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_return(status: [0, ''])
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_feature(group, feature)
 
@@ -93,10 +91,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera is having some problems' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_return(status: 500, body: '')
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_feature(group, feature)
 
@@ -105,10 +101,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera times out' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_timeout
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_feature(group, feature)
 
@@ -162,10 +156,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera is down' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_return(status: [0, ''])
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_features_for_group(group)
 
@@ -174,10 +166,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera is having some problems' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_return(status: 500, body: '')
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_features_for_group(group)
 
@@ -186,10 +176,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera times out' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_timeout
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_features_for_group(group)
 
@@ -242,10 +230,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera is down' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_return(status: [0, ''])
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_all
 
@@ -254,10 +240,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera is having some problems' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_return(status: 200, body: '<html></html>')
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_all
 
@@ -266,10 +250,8 @@ describe Bandiera::Client do
     end
 
     context 'bandiera times out' do
-      it 'returns a default response and logs a warning' do
+      it 'returns a default response' do
         stub_request(:get, url).to_timeout
-
-        expect(logger).to receive(:warn).once
 
         response = subject.get_all
 
