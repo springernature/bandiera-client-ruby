@@ -108,7 +108,7 @@ module Bandiera
     end
 
     EXCEPTIONS_TO_HANDLE = (
-      Errno.constants.map { |cla| Errno.const_get(cla) } + [RestClient::Exception, JSON::ParserError]
+      Errno.constants.map { |cla| Errno.const_get(cla) } + [RestClient::Exception, JSON::ParserError, SocketError]
     ).flatten
 
     def get_and_handle_exceptions(path, params, http_opts, return_upon_error, error_msg_prefix, &block)
@@ -118,6 +118,11 @@ module Bandiera
       res['response']
     rescue *EXCEPTIONS_TO_HANDLE
       return_upon_error
+    rescue => e
+      message = "UNHANDLED EXCEPTION #{e.inspect} - CLASS #{e.class.name}"
+      $stderr.puts message
+      logger.error(message)
+      raise
     end
 
     def get(path, params, passed_http_opts)
