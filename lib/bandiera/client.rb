@@ -118,12 +118,10 @@ module Bandiera
       res['response']
     rescue *EXCEPTIONS_TO_HANDLE => e
       message = "Bandiera::Client - HANDLED EXCEPTION #{e.inspect} - CLASS #{e.class.name}"
-      $stderr.puts message
       logger.warn(message)
       return_upon_error
     rescue => e
       message = "Bandiera::Client - UNHANDLED EXCEPTION #{e.inspect} - CLASS #{e.class.name}"
-      $stderr.puts message
       logger.error(message)
       raise
     end

@@ -30,6 +30,14 @@ describe Bandiera::Client do
         expect(response).to eq expected_error_response
       end
     end
+
+    context 'bandiera cannot be contacted' do
+      it 'returns a default response' do
+        stub_request(:get, url).to_raise(::SocketError)
+
+        expect(response).to eq expected_error_response
+      end
+    end
   end
 
   context 'when a client name is provided' do
