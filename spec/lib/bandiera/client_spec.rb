@@ -4,7 +4,33 @@ describe Bandiera::Client do
   let(:base_uri)  { 'http://bandiera.com' }
   let(:api_uri)   { "#{base_uri}/api" }
   let(:logger)    { double.as_null_object }
-  subject         { Bandiera::Client.new(api_uri, logger) }
+  let(:client_instance) { Bandiera::Client.new(api_uri, logger) }
+
+  shared_examples_for 'a robust request' do
+    context 'bandiera is down' do
+      it 'returns a default response' do
+        stub_request(:get, url).to_return(status: [0, ''])
+
+        expect(response).to eq expected_error_response
+      end
+    end
+
+    context 'bandiera is having some problems' do
+      it 'returns a default response' do
+        stub_request(:get, url).to_return(status: 500, body: '')
+
+        expect(response).to eq expected_error_response
+      end
+    end
+
+    context 'bandiera times out' do
+      it 'returns a default response' do
+        stub_request(:get, url).to_timeout
+
+        expect(response).to eq expected_error_response
+      end
+    end
+  end
 
   context 'when a client name is provided' do
     let(:group)   { 'pubserv' }
@@ -32,7 +58,7 @@ describe Bandiera::Client do
         .once
         .and_return(resource)
 
-      subject.enabled?('foo', 'bar', params, options)
+      client_instance.enabled?('foo', 'bar', params, options)
     end
   end
 
@@ -40,11 +66,12 @@ describe Bandiera::Client do
     let(:group)   { 'pubserv' }
     let(:feature) { 'log-stats' }
     let(:url)     { "#{api_uri}/v2/groups/#{group}/features/#{feature}" }
+    let(:response) { client_instance.get_feature(group, feature) }
+    let(:expected_error_response) {false}
 
     context 'all is ok' do
       it 'returns the bandiera response' do
         stub     = stub_api_request(url, 'response' => true)
-        response = subject.get_feature(group, feature)
 
         expect(response).to be true
         expect(stub).to have_been_requested
@@ -59,7 +86,7 @@ describe Bandiera::Client do
                      headers: { 'Content-Type' => 'application/json' }
                    )
 
-          subject.get_feature(group, feature, { user_group: 'admin', user_id: 12345 })
+          client_instance.get_feature(group, feature, { user_group: 'admin', user_id: 12345 })
 
           expect(stub).to have_been_requested
         end
@@ -72,54 +99,26 @@ describe Bandiera::Client do
           # 2 calls - one for the request, one for the warning
           expect(logger).to receive(:debug).twice
 
-          response = subject.get_feature(group, feature)
-
           expect(response).to be false
           expect(stub).to have_been_requested
         end
       end
     end
 
-    context 'bandiera is down' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_return(status: [0, ''])
+    it_behaves_like 'a robust request'
 
-        response = subject.get_feature(group, feature)
-
-        expect(response).to be false
-      end
-    end
-
-    context 'bandiera is having some problems' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_return(status: 500, body: '')
-
-        response = subject.get_feature(group, feature)
-
-        expect(response).to be false
-      end
-    end
-
-    context 'bandiera times out' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_timeout
-
-        response = subject.get_feature(group, feature)
-
-        expect(response).to be false
-      end
-    end
   end
 
   describe '#get_features_for_group' do
     let(:group) { 'pubserv' }
     let(:url)   { "#{api_uri}/v2/groups/#{group}/features" }
+    let(:response) { client_instance.get_features_for_group(group) }
+    let(:expected_error_response) { {} }
 
     context 'all is ok' do
       it 'returns the bandiera response' do
         feature_hash = { 'show-stuff' => true, 'show-other-stuff' => false }
         stub         = stub_api_request(url, 'response' => feature_hash)
-        response     = subject.get_features_for_group(group)
 
         expect(response).to eq(feature_hash)
         expect(stub).to have_been_requested
@@ -134,7 +133,7 @@ describe Bandiera::Client do
                      headers: { 'Content-Type' => 'application/json' }
                    )
 
-          subject.get_features_for_group(group, { user_group: 'admin', user_id: 12345 })
+          client_instance.get_features_for_group(group, { user_group: 'admin', user_id: 12345 })
 
           expect(stub).to have_been_requested
         end
@@ -147,53 +146,24 @@ describe Bandiera::Client do
           # 2 calls - one for the request, one for the warning
           expect(logger).to receive(:debug).twice
 
-          response = subject.get_features_for_group(group)
-
           expect(response).to be {}
           expect(stub).to have_been_requested
         end
       end
     end
 
-    context 'bandiera is down' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_return(status: [0, ''])
-
-        response = subject.get_features_for_group(group)
-
-        expect(response).to be {}
-      end
-    end
-
-    context 'bandiera is having some problems' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_return(status: 500, body: '')
-
-        response = subject.get_features_for_group(group)
-
-        expect(response).to be {}
-      end
-    end
-
-    context 'bandiera times out' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_timeout
-
-        response = subject.get_features_for_group(group)
-
-        expect(response).to be {}
-      end
-    end
+    it_behaves_like 'a robust request'
   end
 
   describe '#get_all' do
     let(:url) { "#{api_uri}/v2/all" }
+    let(:response) { client_instance.get_all }
+    let(:expected_error_response) { {} }
 
     context 'all is ok' do
       it 'returns the bandiera response' do
         feature_hash = { 'pubserv' => { 'show-stuff' => true, 'show-other-stuff' => false } }
         stub         = stub_api_request(url, 'response' => feature_hash)
-        response     = subject.get_all
 
         expect(response).to eq(feature_hash)
         expect(stub).to have_been_requested
@@ -208,7 +178,7 @@ describe Bandiera::Client do
                      headers: { 'Content-Type' => 'application/json' }
                    )
 
-          subject.get_all({ user_group: 'admin', user_id: 12345 })
+          client_instance.get_all({ user_group: 'admin', user_id: 12345 })
 
           expect(stub).to have_been_requested
         end
@@ -221,43 +191,13 @@ describe Bandiera::Client do
           # 2 calls - one for the request, one for the warning
           expect(logger).to receive(:debug).twice
 
-          response = subject.get_all
-
           expect(response).to be {}
           expect(stub).to have_been_requested
         end
       end
     end
 
-    context 'bandiera is down' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_return(status: [0, ''])
-
-        response = subject.get_all
-
-        expect(response).to be {}
-      end
-    end
-
-    context 'bandiera is having some problems' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_return(status: 200, body: '<html></html>')
-
-        response = subject.get_all
-
-        expect(response).to be {}
-      end
-    end
-
-    context 'bandiera times out' do
-      it 'returns a default response' do
-        stub_request(:get, url).to_timeout
-
-        response = subject.get_all
-
-        expect(response).to be {}
-      end
-    end
+    it_behaves_like 'a robust request'
   end
 
   private

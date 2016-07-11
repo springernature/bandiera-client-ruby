@@ -116,10 +116,13 @@ module Bandiera
       logger.debug("#{error_msg_prefix} - #{res['warning']}") if res['warning']
       block.call(res['response']) if block
       res['response']
-    rescue *EXCEPTIONS_TO_HANDLE
+    rescue *EXCEPTIONS_TO_HANDLE => e
+      message = "Bandiera::Client - HANDLED EXCEPTION #{e.inspect} - CLASS #{e.class.name}"
+      $stderr.puts message
+      logger.warn(message)
       return_upon_error
     rescue => e
-      message = "UNHANDLED EXCEPTION #{e.inspect} - CLASS #{e.class.name}"
+      message = "Bandiera::Client - UNHANDLED EXCEPTION #{e.inspect} - CLASS #{e.class.name}"
       $stderr.puts message
       logger.error(message)
       raise
