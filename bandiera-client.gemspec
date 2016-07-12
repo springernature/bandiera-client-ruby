@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'webmock'
   spec.add_development_dependency 'rack-test'
+  spec.add_development_dependency 'rack', '< 2.0.0' # NOTE for the time being, don't force us to use ruby 2.2.2 please.
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'pry'
 
