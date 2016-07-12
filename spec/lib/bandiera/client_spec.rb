@@ -4,7 +4,7 @@ describe Bandiera::Client do
   let(:base_uri)  { 'http://bandiera.com' }
   let(:api_uri)   { "#{base_uri}/api" }
   let(:logger)    { double.as_null_object }
-  let(:client_instance) { Bandiera::Client.new(api_uri, logger) }
+  subject         { Bandiera::Client.new(api_uri, logger) }
 
   shared_examples_for 'a robust request' do
     context 'bandiera is down' do
@@ -66,7 +66,7 @@ describe Bandiera::Client do
         .once
         .and_return(resource)
 
-      client_instance.enabled?('foo', 'bar', params, options)
+      subject.enabled?('foo', 'bar', params, options)
     end
   end
 
@@ -74,8 +74,8 @@ describe Bandiera::Client do
     let(:group)   { 'pubserv' }
     let(:feature) { 'log-stats' }
     let(:url)     { "#{api_uri}/v2/groups/#{group}/features/#{feature}" }
-    let(:response) { client_instance.get_feature(group, feature) }
-    let(:expected_error_response) {false}
+    let(:response) { subject.get_feature(group, feature) }
+    let(:expected_error_response) { false }
 
     context 'all is ok' do
       it 'returns the bandiera response' do
@@ -94,7 +94,7 @@ describe Bandiera::Client do
                      headers: { 'Content-Type' => 'application/json' }
                    )
 
-          client_instance.get_feature(group, feature, { user_group: 'admin', user_id: 12345 })
+          subject.get_feature(group, feature, { user_group: 'admin', user_id: 12345 })
 
           expect(stub).to have_been_requested
         end
@@ -120,7 +120,7 @@ describe Bandiera::Client do
   describe '#get_features_for_group' do
     let(:group) { 'pubserv' }
     let(:url)   { "#{api_uri}/v2/groups/#{group}/features" }
-    let(:response) { client_instance.get_features_for_group(group) }
+    let(:response) { subject.get_features_for_group(group) }
     let(:expected_error_response) { {} }
 
     context 'all is ok' do
@@ -141,7 +141,7 @@ describe Bandiera::Client do
                      headers: { 'Content-Type' => 'application/json' }
                    )
 
-          client_instance.get_features_for_group(group, { user_group: 'admin', user_id: 12345 })
+          subject.get_features_for_group(group, { user_group: 'admin', user_id: 12345 })
 
           expect(stub).to have_been_requested
         end
@@ -165,7 +165,7 @@ describe Bandiera::Client do
 
   describe '#get_all' do
     let(:url) { "#{api_uri}/v2/all" }
-    let(:response) { client_instance.get_all }
+    let(:response) { subject.get_all }
     let(:expected_error_response) { {} }
 
     context 'all is ok' do
@@ -186,7 +186,7 @@ describe Bandiera::Client do
                      headers: { 'Content-Type' => 'application/json' }
                    )
 
-          client_instance.get_all({ user_group: 'admin', user_id: 12345 })
+          subject.get_all({ user_group: 'admin', user_id: 12345 })
 
           expect(stub).to have_been_requested
         end
