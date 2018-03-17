@@ -1,6 +1,7 @@
-require 'rest_client'
+require 'typhoeus'
 require 'json'
 require 'logger'
+require 'bandiera/client/errors'
 
 module Bandiera
   ##
@@ -25,11 +26,11 @@ module Bandiera
     # @param [String] client_name A client name to pass through along with the HTTP requests
     #
     def initialize(base_uri = 'http://localhost', logger = Logger.new($stdout), client_name = nil)
-      @base_uri       = base_uri
-      @base_uri       << '/api' unless @base_uri.match(/\/api$/)
-      @logger         = logger
-      @timeout        = 0.2 # 0.4s (0.2 + 0.2) default timeout
-      @client_name    = client_name
+      @base_uri    = base_uri
+      @base_uri    << '/api' unless @base_uri.match(/\/api$/)
+      @logger      = logger
+      @timeout     = 0.2 # 0.4s (0.2 + 0.2) default timeout
+      @client_name = client_name
     end
 
     # @deprecated This functionality was deprecated/removed in 3.0.0
@@ -108,7 +109,7 @@ module Bandiera
     end
 
     EXCEPTIONS_TO_HANDLE = (
-      Errno.constants.map { |cla| Errno.const_get(cla) } + [RestClient::Exception, JSON::ParserError, SocketError]
+      Errno.constants.map { |cla| Errno.const_get(cla) } + [Bandiera::Client::Error, JSON::ParserError, SocketError]
     ).flatten
 
     def get_and_handle_exceptions(path, params, http_opts, return_upon_error, error_msg_prefix, &block)
@@ -127,11 +128,19 @@ module Bandiera
     end
 
     def get(path, params, passed_http_opts)
-      default_http_opts = { method: :get, timeout: timeout, open_timeout: timeout, headers: headers }
-      resource          = RestClient::Resource.new(@base_uri, default_http_opts.merge(passed_http_opts))
-      response          = resource[path].get(params: clean_params(params))
+      default_http_opts = { method: :get, timeout: timeout, headers: headers, params: clean_params(params) }
+      resource = Typhoeus::Request.new("#{@base_uri}#{path}", default_http_opts.merge(passed_http_opts))
+      response = resource.run
 
-      JSON.parse(response.body)
+      if response.success?
+        JSON.parse(response.body)
+      elsif response.timed_out?
+        raise Bandiera::Client::TimeoutError, 'Connection timed out'
+      elsif response.code == 0
+        raise Bandiera::Client::Error, response.return_message
+      else
+        raise Bandiera::Client::ResponseError, "HTTP request failed: " + response.code.to_s
+      end
     end
 
     def clean_params(passed_params)

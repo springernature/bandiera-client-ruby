@@ -53,20 +53,61 @@ describe Bandiera::Client do
     end
   end
 
-  context 'when some RestClient::Resource options are passed' do
-    it 'passes them onto the RestClient::Resource' do
+  context 'when some Typhoeus::Request options are passed' do
+    it 'passes them onto the Typhoeus::Resource' do
       params   = {}
       options  = { timeout: 24, open_timeout: 24 }
-      response = double(:response, body: JSON.generate({ response: {} }))
-      resource = double(:resource, '[]' => double(get: response))
+      response = double(:response, body: JSON.generate({ response: {} }), success?: true)
+      resource = double(:resource, run: response)
 
-      expect(RestClient::Resource)
+      expect(Typhoeus::Request)
         .to receive(:new)
-        .with(api_uri, method: :get, timeout: 24, open_timeout: 24, headers: anything)
+        .with("#{api_uri}/v2/groups/foo/features/bar", method: :get, timeout: 24, open_timeout: 24, headers: {"User-Agent"=>"Bandiera Ruby Client / 3.0.4"}, params: {})
         .once
         .and_return(resource)
 
       subject.enabled?('foo', 'bar', params, options)
+    end
+  end
+
+  context 'raises a Bandiera::Client::Error, Bandiera::Client::TimeoutError or Bandiera::Client::ResponseError if there is a problem' do
+    context 'Bandiera::Client::Error' do
+      it 'is raised if the response code is 0' do
+        params   = {}
+        response = double(:response, body: JSON.generate({ response: {} }), success?: false, timed_out?: false, code: 0, return_message: 'test')
+        resource = double(:resource, run: response)
+
+        allow(Typhoeus::Request).to receive(:new).and_return(resource)
+        expect(logger).to receive(:warn).with('Bandiera::Client - HANDLED EXCEPTION #<Bandiera::Client::Error: test> - CLASS Bandiera::Client::Error')
+
+        subject.enabled?('foo', 'bar', params)
+      end
+    end
+
+    context 'Bandiera::Client::TimeoutError' do
+      it 'is raised if the response is flagged as timed out' do
+        params   = {}
+        response = double(:response, body: JSON.generate({ response: {} }), success?: false, timed_out?: true)
+        resource = double(:resource, run: response)
+
+        allow(Typhoeus::Request).to receive(:new).and_return(resource)
+        expect(logger).to receive(:warn).with('Bandiera::Client - HANDLED EXCEPTION #<Bandiera::Client::TimeoutError: Connection timed out> - CLASS Bandiera::Client::TimeoutError')
+
+        subject.enabled?('foo', 'bar', params)
+      end
+    end
+
+    context 'Bandiera::Client::ResponseError' do
+      it 'is raised if the response is flagged as timed out' do
+        params   = {}
+        response = double(:response, body: JSON.generate({ response: {} }), success?: false, timed_out?: false, code: 404)
+        resource = double(:resource, run: response)
+
+        allow(Typhoeus::Request).to receive(:new).and_return(resource)
+        expect(logger).to receive(:warn).with('Bandiera::Client - HANDLED EXCEPTION #<Bandiera::Client::ResponseError: HTTP request failed: 404> - CLASS Bandiera::Client::ResponseError')
+
+        subject.enabled?('foo', 'bar', params)
+      end
     end
   end
 

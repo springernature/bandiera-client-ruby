@@ -7,7 +7,9 @@ rvm:
   - 2.0
   - 2.1
   - 2.2
-  - 2.3.0
+  - 2.3
+  - 2.4
+  - 2.5
   - jruby-9.0.0.0
 
 # Ensure we don't build for *every* commit (doesn't apply to PR builds)
