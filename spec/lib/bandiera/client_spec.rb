@@ -62,7 +62,7 @@ describe Bandiera::Client do
 
       expect(Typhoeus::Request)
         .to receive(:new)
-        .with("#{api_uri}/v2/groups/foo/features/bar", method: :get, timeout: 24, open_timeout: 24, headers: {"User-Agent"=>"Bandiera Ruby Client / 3.0.4"}, params: {})
+        .with("#{api_uri}/v2/groups/foo/features/bar", method: :get, timeout: 24, open_timeout: 24, headers: {"User-Agent"=>"Bandiera Ruby Client / #{Bandiera::Client::VERSION}"}, params: {})
         .once
         .and_return(resource)
 
